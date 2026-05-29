@@ -5,9 +5,9 @@ const CONFIG = {
     ranking: "Ranking",
     timesSemana: "TimesSemana",
     timesDiaAnterior: "TimesDiaAnterior",
-    evolucaoSemana: "EvolucaoSemana",
     boss: "Boss",
-    ataquesBoss: "AtaquesBoss"
+    ataquesBoss: "AtaquesBoss",
+    podio: "Podio"
   }
 };
 
@@ -19,11 +19,58 @@ const teamColors = {
   "Verde": "#22c55e"
 };
 
+const chartTeamColors = {
+  "Campeão": "#123f73",
+  "Ciano": "#13bfd7",
+  "Amarelo": "#f5bd25",
+  "Vermelho": "#c9283d",
+  "Verde": "#0fb36c"
+};
+
+const teamIcons = {
+  "Campeão": "🏆",
+  "Ciano": "❄️",
+  "Amarelo": "🏆",
+  "Vermelho": "⚔️",
+  "Verde": "🧭"
+};
+
+const podiumColors = {
+  "ciano": {
+    color: "#22d3ee",
+    glow: "rgba(34, 211, 238, 0.28)"
+  },
+  "dourado": {
+    color: "#d4af37",
+    glow: "rgba(250, 204, 21, 0.34)"
+  },
+  "ouro": {
+    color: "#d4af37",
+    glow: "rgba(250, 204, 21, 0.34)"
+  },
+  "verde": {
+    color: "#22c55e",
+    glow: "rgba(34, 197, 94, 0.28)"
+  },
+  "vermelho": {
+    color: "#ef4444",
+    glow: "rgba(239, 68, 68, 0.26)"
+  },
+  "amarelo": {
+    color: "#facc15",
+    glow: "rgba(250, 204, 21, 0.30)"
+  },
+  "azul": {
+    color: "#2563eb",
+    glow: "rgba(37, 99, 235, 0.30)"
+  }
+};
+
 let rankingData = [];
 let weeklyTeamData = [];
 let dailyTeamData = [];
-let weeklyEvolutionData = [];
 let bossAttackData = [];
+let podioData = [];
 let bossData = {
   meta: 0,
   produzido: 0
@@ -31,6 +78,7 @@ let bossData = {
 
 function setStatus(text) {
   const statusText = document.getElementById("statusText");
+
   if (statusText) {
     statusText.textContent = text;
   }
@@ -56,12 +104,6 @@ function hideAlert() {
 
 function formatNumber(value) {
   return new Intl.NumberFormat("pt-BR").format(Number(value) || 0);
-}
-
-function formatPercentNumber(value) {
-  const number = Number(value) || 0;
-
-  return `${number.toFixed(2).replace(".", ",")}%`;
 }
 
 function getPercent(value, total) {
@@ -121,12 +163,6 @@ function parseNumber(value) {
   const parsed = Number(text);
 
   return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function parsePercentNumber(value) {
-  const text = String(value || "").replace("%", "").trim();
-
-  return parseNumber(text);
 }
 
 function formatPercentText(value) {
@@ -296,6 +332,35 @@ function transformBossRows(rows) {
   };
 }
 
+function normalizePodioPosition(value) {
+  const text = String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+  if (["centro", "meio", "1", "primeiro", "1º", "1o"].includes(text)) return "centro";
+  if (["esquerda", "2", "segundo", "2º", "2o"].includes(text)) return "esquerda";
+  if (["direita", "3", "terceiro", "3º", "3o"].includes(text)) return "direita";
+
+  return text;
+}
+
+function transformPodioRows(rows) {
+  return rows
+    .map(row => {
+      return {
+        posicao: normalizePodioPosition(getValue(row, ["posicao", "posição", "lado", "ordem"])),
+        nome: getValue(row, ["nome", "codigo", "código", "operador"]),
+        titulo: getValue(row, ["titulo", "título", "categoria", "selo"]),
+        descricao: getValue(row, ["descricao", "descrição", "texto", "frase"]),
+        cor: String(getValue(row, ["cor", "tema"], "dourado")).toLowerCase().trim(),
+        icone: getValue(row, ["icone", "ícone", "emoji"], "🏆")
+      };
+    })
+    .filter(item => item.posicao && item.nome);
+}
+
 async function loadDataFromGoogleSheets() {
   if (!CONFIG.googleSheetId || CONFIG.googleSheetId.includes("COLE_AQUI")) {
     throw new Error("Informe o ID da planilha no arquivo script.js.");
@@ -305,24 +370,24 @@ async function loadDataFromGoogleSheets() {
     rankingRows,
     timesSemanaRows,
     timesDiaAnteriorRows,
-    evolucaoSemanaRows,
     bossRows,
-    ataquesBossRows
+    ataquesBossRows,
+    podioRows
   ] = await Promise.all([
     fetchSheetRows(CONFIG.abas.ranking),
     fetchSheetRows(CONFIG.abas.timesSemana),
     fetchSheetRows(CONFIG.abas.timesDiaAnterior),
-    fetchSheetRows(CONFIG.abas.evolucaoSemana),
     fetchSheetRows(CONFIG.abas.boss),
-    fetchSheetRows(CONFIG.abas.ataquesBoss)
+    fetchSheetRows(CONFIG.abas.ataquesBoss),
+    fetchSheetRows(CONFIG.abas.podio)
   ]);
 
   rankingData = transformRankingRows(rankingRows);
   weeklyTeamData = transformTeamRows(timesSemanaRows);
   dailyTeamData = transformTeamRows(timesDiaAnteriorRows);
-  weeklyEvolutionData = transformLineRows(evolucaoSemanaRows);
   bossData = transformBossRows(bossRows);
   bossAttackData = transformLineRows(ataquesBossRows);
+  podioData = transformPodioRows(podioRows);
 }
 
 function loadDemoData() {
@@ -370,15 +435,6 @@ function loadDemoData() {
     { time: "Campeão", valor: 1902 }
   ];
 
-  weeklyEvolutionData = [
-    { label: "Seg", valor: 6200 },
-    { label: "Ter", valor: 7500 },
-    { label: "Qua", valor: 6900 },
-    { label: "Qui", valor: 9200 },
-    { label: "Sex", valor: 10400 },
-    { label: "Sáb", valor: 11800 }
-  ];
-
   bossData = {
     meta: 50000,
     produzido: 44744
@@ -392,38 +448,33 @@ function loadDemoData() {
     { label: "D5", valor: 7400 },
     { label: "D6", valor: 8744 }
   ];
-}
 
-function getAverageError() {
-  const errors = rankingData
-    .map(item => parsePercentNumber(item.erro))
-    .filter(value => Number.isFinite(value));
-
-  if (!errors.length) return "0%";
-
-  const average = errors.reduce((sum, value) => sum + value, 0) / errors.length;
-
-  return formatPercentNumber(average);
-}
-
-function renderSummaryCards() {
-  const totalProduzido = weeklyTeamData.reduce((sum, item) => sum + item.valor, 0);
-  const mediaErro = getAverageError();
-
-  const cards = [
-    { label: "Produzido", value: formatNumber(totalProduzido), small: "acumulado da semana", color: "#22c55e" },
-    { label: "Erro médio", value: mediaErro, small: "acumulado geral", color: "#fb923c" }
+  podioData = [
+    {
+      posicao: "esquerda",
+      nome: "Thiago Correia",
+      titulo: "Mestre Coletoria",
+      descricao: "A elite da semana ou do mês em consistência produtiva.",
+      cor: "ciano",
+      icone: "⚙️"
+    },
+    {
+      posicao: "centro",
+      nome: "Zélia Campos",
+      titulo: "Lenda do Picking",
+      descricao: "O MVP absoluto. Título reservado para a maior produção de dúzias.",
+      cor: "dourado",
+      icone: "👑"
+    },
+    {
+      posicao: "direita",
+      nome: "Yasmin Duarte",
+      titulo: "Prodígio",
+      descricao: "A ascensão fulminante nas métricas de apartação.",
+      cor: "verde",
+      icone: "🏆"
+    }
   ];
-
-  const html = cards.map(card => `
-    <article class="metric-card" style="--accent: ${card.color}">
-      <div class="metric-label">${card.label}</div>
-      <div class="metric-value">${card.value}</div>
-      <div class="metric-small">${card.small}</div>
-    </article>
-  `).join("");
-
-  document.getElementById("summaryCards").innerHTML = html;
 }
 
 function renderRankingTable() {
@@ -496,6 +547,68 @@ function renderHorizontalBars(containerId, data) {
           <div class="bar-fill" style="--bar-color: ${color}; width: ${width}%;"></div>
         </div>
         <div class="bar-value">${formatNumber(item.valor)}</div>
+      </div>
+    `;
+  }).join("");
+
+  container.innerHTML = html;
+}
+
+function renderVerticalTeamBars(containerId, data) {
+  const container = document.getElementById(containerId);
+
+  if (!data.length) {
+    container.innerHTML = `<div class="empty-state">Nenhum dado encontrado para pontuação acumulada.</div>`;
+    return;
+  }
+
+  const maxValue = Math.max(...data.map(item => item.valor));
+
+  const html = data.map(item => {
+    const height = maxValue > 0 ? Math.max(18, Math.round((item.valor / maxValue) * 100)) : 0;
+    const color = chartTeamColors[item.time] || teamColors[item.time] || "#94a3b8";
+    const icon = teamIcons[item.time] || "●";
+
+    return `
+      <div class="vertical-team-item">
+        <div class="vertical-team-value">${formatNumber(item.valor)}</div>
+        <div class="vertical-team-bar-wrap">
+          <div class="vertical-team-bar" style="--bar-color: ${color}; height: ${height}%;">
+            <span class="vertical-team-icon">${icon}</span>
+          </div>
+        </div>
+        <div class="vertical-team-label">${item.time}</div>
+      </div>
+    `;
+  }).join("");
+
+  container.innerHTML = html;
+}
+
+function renderDailyTeamBars(containerId, data) {
+  const container = document.getElementById(containerId);
+
+  if (!data.length) {
+    container.innerHTML = `<div class="empty-state">Nenhum dado encontrado para produção diária.</div>`;
+    return;
+  }
+
+  const maxValue = Math.max(...data.map(item => item.valor));
+
+  const html = data.map(item => {
+    const width = maxValue > 0 ? Math.max(12, Math.round((item.valor / maxValue) * 100)) : 0;
+    const color = chartTeamColors[item.time] || teamColors[item.time] || "#94a3b8";
+    const icon = teamIcons[item.time] || "●";
+
+    return `
+      <div class="daily-team-row">
+        <div class="daily-team-name">${item.time}</div>
+        <div class="daily-team-track">
+          <div class="daily-team-fill" style="--bar-color: ${color}; width: ${width}%;">
+            <span class="daily-team-icon">${icon}</span>
+          </div>
+        </div>
+        <div class="daily-team-value">${formatNumber(item.valor)}</div>
       </div>
     `;
   }).join("");
@@ -588,7 +701,7 @@ function renderDonutChart() {
   let startDegree = 0;
 
   const gradient = weeklyTeamData.map(item => {
-    const color = teamColors[item.time] || "#94a3b8";
+    const color = chartTeamColors[item.time] || teamColors[item.time] || "#94a3b8";
     const degrees = total > 0 ? (item.valor / total) * 360 : 0;
     const segment = `${color} ${startDegree}deg ${startDegree + degrees}deg`;
 
@@ -599,7 +712,7 @@ function renderDonutChart() {
 
   const legendHtml = weeklyTeamData.map(item => {
     const percent = getPercent(item.valor, total);
-    const color = teamColors[item.time] || "#94a3b8";
+    const color = chartTeamColors[item.time] || teamColors[item.time] || "#94a3b8";
 
     return `
       <div class="legend-item">
@@ -637,9 +750,59 @@ function renderBoss() {
   document.getElementById("bossProgressText").textContent = `${percent}% conquistado`;
 
   document.getElementById("bossSummaryInline").textContent =
-    `Falta: ${remainingPercent}%`;
+    `Meta: ${formatNumber(bossData.meta)} • Produzido: ${formatNumber(bossData.produzido)} • Falta: ${remainingPercent}%`;
 
   renderHorizontalBars("bossTeamBars", weeklyTeamData);
+}
+
+function renderPodio() {
+  const container = document.getElementById("podioGrid");
+
+  if (!container) return;
+
+  if (!podioData.length) {
+    container.innerHTML = `<div class="empty-state">Nenhum dado encontrado na aba Podio.</div>`;
+    return;
+  }
+
+  const positions = ["esquerda", "centro", "direita"];
+
+  const html = positions.map(position => {
+    const item = podioData.find(currentItem => currentItem.posicao === position);
+
+    if (!item) {
+      return `
+        <article class="podium-card ${position === "centro" ? "center" : ""}">
+          <div class="podium-stage" style="--podium-color: #64748b; --podium-glow: rgba(100, 116, 139, 0.25);"></div>
+          <div class="podium-info">
+            <strong>Aguardando</strong>
+            <span>Preencha a posição "${position}" na aba Podio.</span>
+          </div>
+        </article>
+      `;
+    }
+
+    const colorConfig = podiumColors[item.cor] || podiumColors.dourado;
+    const centerClass = position === "centro" ? "center" : "";
+
+    return `
+      <article class="podium-card ${centerClass}">
+        <div class="podium-stage" style="--podium-color: ${colorConfig.color}; --podium-glow: ${colorConfig.glow};">
+          <div class="podium-medal">
+            <span>${item.titulo}</span>
+          </div>
+          <div class="podium-icon">${item.icone}</div>
+        </div>
+
+        <div class="podium-info">
+          <strong>${item.nome}</strong>
+          <span>${item.descricao}</span>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  container.innerHTML = html;
 }
 
 function setupTabs() {
@@ -665,14 +828,13 @@ function setupTabs() {
 }
 
 function renderDashboard() {
-  renderSummaryCards();
   renderRankingTable();
-  renderHorizontalBars("weeklyBars", weeklyTeamData);
-  renderHorizontalBars("dailyBars", dailyTeamData);
-  renderLineChart("lineChart", weeklyEvolutionData);
+  renderVerticalTeamBars("weeklyBars", weeklyTeamData);
+  renderDailyTeamBars("dailyBars", dailyTeamData);
   renderDonutChart();
   renderBoss();
   renderLineChart("bossAttackChart", bossAttackData);
+  renderPodio();
 }
 
 async function initDashboard() {
