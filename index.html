@@ -105,17 +105,6 @@
 
       <section class="section">
         <div class="section-title">
-          <h2>🔥 Placar dos Times</h2>
-          <span>acumulado</span>
-        </div>
-
-        <div class="card">
-          <div id="bossTeamBars" class="bar-list"></div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-title">
           <h2>⚔️ Ataques ao Boss</h2>
           <span>últimos dias</span>
         </div>
@@ -139,13 +128,31 @@
         </p>
       </section>
     </section>
+
+    <section id="lojinhaTab" class="tab-content">
+      <section class="section shop-section">
+        <div class="section-title">
+          <h2>🛒 Lojinha</h2>
+          <span>troca presencial</span>
+        </div>
+
+        <div class="shop-intro">
+          <strong>Catálogo de Prêmios</strong>
+          <span>Escolha seu prêmio e solicite a troca diretamente ao líder responsável.</span>
+        </div>
+
+        <div id="lojinhaGrid" class="shop-grid"></div>
+      </section>
+    </section>
+
   </main>
 
   <nav class="bottom-tabs">
-    <button class="tab-button active" data-tab="rankingTab">🏆 Ranking</button>
-    <button class="tab-button" data-tab="bossTab">👾 Boss</button>
-    <button class="tab-button" data-tab="podioTab">🏛️ Pódio</button>
-  </nav>
+  <button class="tab-button active" data-tab="rankingTab">🏆 Ranking</button>
+  <button class="tab-button" data-tab="bossTab">👾 Boss</button>
+  <button class="tab-button" data-tab="podioTab">🏛️ Pódio</button>
+  <button class="tab-button" data-tab="lojinhaTab">🛒 Lojinha</button>
+</nav>
 
   <script defer src="./script.js"></script>
 </body>
