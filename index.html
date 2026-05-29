@@ -22,8 +22,6 @@
     </header>
 
     <section id="rankingTab" class="tab-content active">
-      <div class="cards-grid" id="summaryCards"></div>
-
       <section class="section">
         <div class="section-title">
           <h2>🏆 Ranking da Semana</h2>
@@ -59,7 +57,7 @@
         </div>
 
         <div class="card">
-          <div id="weeklyBars" class="bar-list"></div>
+          <div id="weeklyBars" class="vertical-team-chart"></div>
         </div>
       </section>
 
@@ -70,18 +68,7 @@
         </div>
 
         <div class="card">
-          <div id="dailyBars" class="bar-list"></div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-title">
-          <h2>📈 Evolução da Semana</h2>
-          <span>Google Sheets</span>
-        </div>
-
-        <div class="card">
-          <div id="lineChart" class="line-chart"></div>
+          <div id="dailyBars" class="daily-team-chart"></div>
         </div>
       </section>
 
@@ -136,11 +123,26 @@
         </div>
       </section>
     </section>
+
+    <section id="podioTab" class="tab-content">
+      <section class="section podium-section">
+        <div class="podium-title-block">
+          <h2>Hall da Fama: Consagre Seu Nome</h2>
+        </div>
+
+        <div id="podioGrid" class="podium-grid"></div>
+
+        <p class="podium-footer">
+          O Jogo Começou. Escolha sua estratégia, junte-se ao seu time e domine o EPA!
+        </p>
+      </section>
+    </section>
   </main>
 
   <nav class="bottom-tabs">
     <button class="tab-button active" data-tab="rankingTab">🏆 Ranking</button>
-    <button class="tab-button" data-tab="bossTab">👾 Boss da Semana</button>
+    <button class="tab-button" data-tab="bossTab">👾 Boss</button>
+    <button class="tab-button" data-tab="podioTab">🏛️ Pódio</button>
   </nav>
 
   <script defer src="./script.js"></script>
