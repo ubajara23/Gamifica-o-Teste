@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apartação Gamificada</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <main class="app">
+    <header class="topbar">
+      <h1 class="app-title">Apartação Gamificada</h1>
+      <p class="app-subtitle">Ranking, produtividade dos times e evolução da meta semanal.</p>
+
+      <div class="status-pill">
+        <span class="live-dot"></span>
+        <span id="statusText">Online</span>
+      </div>
+
+      <div id="appAlert" class="app-alert" hidden></div>
+    </header>
+
+    <section id="rankingTab" class="tab-content active">
+      <div class="cards-grid" id="summaryCards"></div>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>🏆 Ranking da Semana</h2>
+          <span>Lupo Nordeste</span>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Código</th>
+                  <th>Dzs. Acumuladas</th>
+                  <th>% Acum Erro</th>
+                  <th>Rodadas</th>
+                  <th>Time</th>
+                  <th>Últimos 5 dias</th>
+                </tr>
+              </thead>
+              <tbody id="rankingTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <p class="hint">Arraste a tabela para o lado para visualizar todas as colunas no celular.</p>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>📊 Pontuação Acumulada</h2>
+          <span>semana</span>
+        </div>
+
+        <div class="card">
+          <div id="weeklyBars" class="bar-list"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>⚡ Produção do Dia Anterior</h2>
+          <span>por time</span>
+        </div>
+
+        <div class="card">
+          <div id="dailyBars" class="bar-list"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>📈 Evolução da Semana</h2>
+          <span>Google Sheets</span>
+        </div>
+
+        <div class="card">
+          <div id="lineChart" class="line-chart"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>🍩 Participação por Time</h2>
+          <span>acumulado</span>
+        </div>
+
+        <div class="card">
+          <div id="donutChart" class="donut-area"></div>
+        </div>
+      </section>
+    </section>
+
+    <section id="bossTab" class="tab-content">
+      <div class="boss-hero">
+        <div class="boss-label">Desafio ativo</div>
+        <h2 class="boss-title">Boss da Semana</h2>
+
+        <div id="bossPercent" class="boss-percent">0%</div>
+
+        <div class="boss-progress-wrap">
+          <div class="boss-progress-track">
+            <div id="bossProgressFill" class="boss-progress-fill"></div>
+            <div id="bossProgressText" class="boss-progress-text">Carregando...</div>
+          </div>
+        </div>
+
+        <p id="bossSummaryInline" class="boss-summary-inline"></p>
+      </div>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>🔥 Placar dos Times</h2>
+          <span>acumulado</span>
+        </div>
+
+        <div class="card">
+          <div id="bossTeamBars" class="bar-list"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>⚔️ Ataques ao Boss</h2>
+          <span>últimos dias</span>
+        </div>
+
+        <div class="card">
+          <div id="bossAttackChart" class="line-chart"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <nav class="bottom-tabs">
+    <button class="tab-button active" data-tab="rankingTab">🏆 Ranking</button>
+    <button class="tab-button" data-tab="bossTab">👾 Boss da Semana</button>
+  </nav>
+
+  <script defer src="./script.js"></script>
+</body>
+</html>
